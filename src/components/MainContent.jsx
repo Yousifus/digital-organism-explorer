@@ -11,6 +11,7 @@ import MetabolismPanel from './panels/MetabolismPanel';
 import GovernancePanel from './panels/GovernancePanel';
 import EvolutionPanel from './panels/EvolutionPanel';
 import LifecyclePanel from './panels/LifecyclePanel';
+import EcosystemPanel from './panels/EcosystemPanel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -176,10 +177,16 @@ const MainContent = ({ activePanel, onNodeClick, onNodeHover, onPanelChange }) =
       content: <EvolutionPanel />
     },
     lifecycle: {
-      title: 'Lifecycle State Machine',
-      description: 'Complete organism lifecycle with state transitions and monitoring',
+      title: 'Lifecycle Management',
+      description: 'State machine and transitions',
       icon: Activity,
       content: <LifecyclePanel />
+    },
+    ecosystem: {
+      title: 'Personal AI Ecosystem',
+      description: 'Your relationship with your AI companion',
+      icon: Users,
+      content: <EcosystemPanel />
     }
   };
 
