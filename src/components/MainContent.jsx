@@ -14,6 +14,7 @@ import LifecyclePanel from './panels/LifecyclePanel';
 import EcosystemPanel from './panels/EcosystemPanel';
 import JournalPanel from './panels/JournalPanel';
 import LiveChatPanel from './panels/LiveChatPanel';
+import ModelManagementPanel from './panels/ModelManagementPanel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -202,6 +203,12 @@ const MainContent = ({ activePanel, onNodeClick, onNodeHover, onPanelChange }) =
       description: 'Real conversations with your digital organism via LM Studio',
       icon: MessageCircle,
       content: <LiveChatPanel />
+    },
+    modelmanagement: {
+      title: 'Model Management',
+      description: 'Dynamic AI model loading, switching, and optimization',
+      icon: Settings,
+      content: <ModelManagementPanel />
     }
   };
 

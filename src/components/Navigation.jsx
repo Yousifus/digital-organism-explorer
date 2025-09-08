@@ -141,6 +141,12 @@ const Navigation = ({ activePanel, onPanelChange, className }) => {
           label: 'Live Chat',
           icon: MessageCircle,
           description: 'Real AI conversations via LM Studio'
+        },
+        {
+          id: 'modelmanagement',
+          label: 'Model Management',
+          icon: Settings,
+          description: 'Dynamic model loading and optimization'
         }
       ]
     }
