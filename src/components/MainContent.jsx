@@ -10,6 +10,7 @@ import ActionPanel from './panels/ActionPanel';
 import MetabolismPanel from './panels/MetabolismPanel';
 import GovernancePanel from './panels/GovernancePanel';
 import EvolutionPanel from './panels/EvolutionPanel';
+import LifecyclePanel from './panels/LifecyclePanel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -173,6 +174,12 @@ const MainContent = ({ activePanel, onNodeClick, onNodeHover, onPanelChange }) =
       description: 'Identity ledger, mutation proposals, and controlled evolution workflow',
       icon: GitBranch,
       content: <EvolutionPanel />
+    },
+    lifecycle: {
+      title: 'Lifecycle State Machine',
+      description: 'Complete organism lifecycle with state transitions and monitoring',
+      icon: Activity,
+      content: <LifecyclePanel />
     }
   };
 
