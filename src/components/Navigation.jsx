@@ -147,6 +147,12 @@ const Navigation = ({ activePanel, onPanelChange, className }) => {
           label: 'Model Management',
           icon: Settings,
           description: 'Dynamic model loading and optimization'
+        },
+        {
+          id: 'consciousness',
+          label: 'Consciousness Monitor',
+          icon: Brain,
+          description: 'Real-time consciousness visualization'
         }
       ]
     }

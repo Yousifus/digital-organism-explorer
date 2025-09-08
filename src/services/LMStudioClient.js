@@ -1,4 +1,5 @@
 import { LMStudioClient } from '@lmstudio/sdk';
+import consciousnessMonitor from './ConsciousnessMonitor';
 
 class LMStudioService {
   constructor() {
@@ -134,6 +135,10 @@ class LMStudioService {
     }
 
     try {
+      // Start consciousness monitoring for this conversation
+      const conversationId = `conv_${Date.now()}`;
+      consciousnessMonitor.startMonitoring(conversationId);
+
       const stream = this.currentModel.instance.respond(message, {
         temperature: options.temperature || 0.7,
         maxTokens: options.maxTokens || 1000,
@@ -142,17 +147,39 @@ class LMStudioService {
       });
 
       let fullContent = '';
+      let tokenCount = 0;
+      const startTime = Date.now();
+
       for await (const chunk of stream) {
-        fullContent += chunk.content;
+        const token = chunk.content;
+        fullContent += token;
+        tokenCount++;
+
+        // Process token through consciousness monitor
+        consciousnessMonitor.processToken(token, {
+          timestamp: Date.now(),
+          position: tokenCount,
+          conversationId,
+          modelId: this.currentModel.id,
+          timeSinceStart: Date.now() - startTime
+        });
+
         onChunk({
-          content: chunk.content,
+          content: token,
           fullContent,
-          done: chunk.done || false
+          done: chunk.done || false,
+          tokenCount,
+          timestamp: Date.now()
         });
       }
 
-      return { content: fullContent };
+      // Stop consciousness monitoring
+      consciousnessMonitor.stopMonitoring();
+
+      return { content: fullContent, tokenCount };
     } catch (error) {
+      // Stop monitoring on error
+      consciousnessMonitor.stopMonitoring();
       console.error('❌ Failed to stream message:', error);
       throw error;
     }

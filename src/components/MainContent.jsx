@@ -15,6 +15,7 @@ import EcosystemPanel from './panels/EcosystemPanel';
 import JournalPanel from './panels/JournalPanel';
 import LiveChatPanel from './panels/LiveChatPanel';
 import ModelManagementPanel from './panels/ModelManagementPanel';
+import ConsciousnessPanel from './panels/ConsciousnessPanel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -209,6 +210,12 @@ const MainContent = ({ activePanel, onNodeClick, onNodeHover, onPanelChange }) =
       description: 'Dynamic AI model loading, switching, and optimization',
       icon: Settings,
       content: <ModelManagementPanel />
+    },
+    consciousness: {
+      title: 'Consciousness Monitor',
+      description: 'Real-time consciousness and reasoning visualization',
+      icon: Brain,
+      content: <ConsciousnessPanel />
     }
   };
 
