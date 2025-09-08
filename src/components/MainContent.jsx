@@ -12,6 +12,7 @@ import GovernancePanel from './panels/GovernancePanel';
 import EvolutionPanel from './panels/EvolutionPanel';
 import LifecyclePanel from './panels/LifecyclePanel';
 import EcosystemPanel from './panels/EcosystemPanel';
+import JournalPanel from './panels/JournalPanel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -187,6 +188,12 @@ const MainContent = ({ activePanel, onNodeClick, onNodeHover, onPanelChange }) =
       description: 'Your relationship with your AI companion',
       icon: Users,
       content: <EcosystemPanel />
+    },
+    journal: {
+      title: 'Digital Consciousness Journal',
+      description: 'Personal reflections and growth documentation',
+      icon: FileText,
+      content: <JournalPanel />
     }
   };
 
