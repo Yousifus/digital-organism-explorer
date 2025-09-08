@@ -7,6 +7,7 @@ import TemporalityPanel from './panels/TemporalityPanel';
 import PerceptionPanel from './panels/PerceptionPanel';
 import CognitionPanel from './panels/CognitionPanel';
 import ActionPanel from './panels/ActionPanel';
+import MetabolismPanel from './panels/MetabolismPanel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -157,66 +158,7 @@ const MainContent = ({ activePanel, onNodeClick, onNodeHover, onPanelChange }) =
       title: 'Metabolism & Homeostasis',
       description: 'Token consumption, resource management, and health monitoring',
       icon: Heart,
-      content: (
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Zap className="h-5 w-5" />
-                <span>Metabolic Dashboard</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-3">
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Token Rate</span>
-                      <span>75 tok/s</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-blue-500 h-2 rounded-full" style={{width: '75%'}}></div>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>VRAM Usage</span>
-                      <span>12.4 GB</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-green-500 h-2 rounded-full" style={{width: '62%'}}></div>
-                    </div>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>CPU Load</span>
-                      <span>45%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-yellow-500 h-2 rounded-full" style={{width: '45%'}}></div>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Temperature</span>
-                      <span>68°C</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-orange-500 h-2 rounded-full" style={{width: '68%'}}></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <DiagramViewer 
-            onNodeClick={onNodeClick}
-            onNodeHover={onNodeHover}
-          />
-        </div>
-      )
+      content: <MetabolismPanel />
     }
   };
 
