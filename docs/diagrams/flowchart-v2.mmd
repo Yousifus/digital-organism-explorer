@@ -1,0 +1,83 @@
+---
+config:
+  theme: base
+  layout: elk
+  look: neo
+---
+flowchart TD
+ subgraph Runtime["Runtime"]
+        RT1["LM Studio"]
+        RT2["Operating System"]
+        RT3["GPU / CPU"]
+  end
+ subgraph Perception["Perception"]
+        A["Inputs: tokens, files, sensors, events"]
+        TIN["Token stream"]
+        FIN["File changes / directory listings"]
+        APIIN["APIs / webhooks / network"]
+  end
+ subgraph Cognition["Cognition"]
+        B{"Reasoning tokens + planning"}
+        ATTN["Attention / working memory"]
+        WM["World model (implicit)"]
+        GOALS["Goal store / values"]
+        SELF["Self-model / identity"]
+        CRIT["Critic / reflection"]
+        POL["Policy / selection"]
+  end
+ subgraph Action["Action"]
+        C["Tool call via MCP / function call"]
+        D["Output tokens"]
+        EFFECTS["Environment effects: files / APIs"]
+  end
+ subgraph Memory["Memory"]
+        F["Memory update: short, long, episodic, semantic, procedural, affective, social"]
+        VEC["Vector store / files / DB"]
+        EPI["Journals / timelines / logs"]
+  end
+ subgraph Governance["Governance / Safety"]
+        PERM["Permissions / sandbox"]
+        GUARD["Guardrails / red-team tests"]
+        AUDIT["Audit logs / provenance"]
+        ROLLBACK["Rollback / restore points"]
+  end
+ subgraph Homeostasis["Homeostasis / Metabolism"]
+        BUDGET["Compute / latency budget"]
+        THERM["Power / thermals / VRAM"]
+        RATE["Rate limits / quotas"]
+        HEALTH["Health checks / telemetry"]
+  end
+ subgraph Evolution["Evolution / Versioning"]
+        H{"System or config edits"}
+        I["Versions / backups / checkpoints"]
+        MUT["Mutation proposals (prompt/config)"]
+        REVIEW["Review gate (sandbox + HITL)"]
+        FT["Fine-tunes / plugins / adapters"]
+  end
+    A --> B
+    TIN --> B
+    FIN --> B
+    APIIN --> B
+    B -- Plan --> C
+    B -- Respond --> D
+    C --> EFFECTS
+    EFFECTS --> F
+    F --> B & H
+    D --> G["Human feedback"]
+    G --> B
+    F --- VEC & EPI
+    PERM -. gates .-> C
+    GUARD -. tests .-> B
+    AUDIT -. logs .-> C
+    ROLLBACK -. restore .-> H
+    BUDGET -. constraint .-> B & C
+    THERM -. monitor .-> B
+    RATE -. constraint .-> C
+    HEALTH -. signal .-> B
+    MUT --> REVIEW
+    REVIEW --> H
+    H --> I
+    FT --> B
+    B --- RT1
+    C --- RT1
+    D --- RT1

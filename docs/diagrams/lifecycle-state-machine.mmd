@@ -1,0 +1,29 @@
+---
+config:
+  theme: base
+  layout: elk
+---
+stateDiagram
+  direction TB
+  [*] --> Init
+  Init --> Boot:load model + system prompt + configs
+  Boot --> Idle:health OK
+  Idle --> Perceive:input tokens/events
+  Perceive --> Plan:reasoning tokens
+  Plan --> Act:choose tools/output
+  Act --> Learn:write memories
+  Learn --> Reflect:self-eval/critique
+  Reflect --> Idle
+  Reflect --> Evolve:propose edits/updates
+  Evolve --> Review:sandbox + HITL
+  Review --> Deploy:approved
+  Deploy --> Idle
+  Review --> Rollback:rejected
+  Rollback --> Idle
+  Perceive --> Error:tool failure
+  Error --> Recover:retry/fallback
+  Recover --> Idle
+  Idle --> Sleep:low budget/thermals
+  Sleep --> Idle:resume
+  Idle --> Shutdown:save state + exit
+  Shutdown --> [*]
