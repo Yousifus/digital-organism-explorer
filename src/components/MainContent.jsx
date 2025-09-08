@@ -13,6 +13,7 @@ import EvolutionPanel from './panels/EvolutionPanel';
 import LifecyclePanel from './panels/LifecyclePanel';
 import EcosystemPanel from './panels/EcosystemPanel';
 import JournalPanel from './panels/JournalPanel';
+import LiveChatPanel from './panels/LiveChatPanel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -30,7 +31,8 @@ import {
   Settings,
   FileText,
   ArrowRight,
-  Zap
+  Zap,
+  MessageCircle
 } from 'lucide-react';
 
 const MainContent = ({ activePanel, onNodeClick, onNodeHover, onPanelChange }) => {
@@ -194,6 +196,12 @@ const MainContent = ({ activePanel, onNodeClick, onNodeHover, onPanelChange }) =
       description: 'Personal reflections and growth documentation',
       icon: FileText,
       content: <JournalPanel />
+    },
+    livechat: {
+      title: 'Live AI Chat',
+      description: 'Real conversations with your digital organism via LM Studio',
+      icon: MessageCircle,
+      content: <LiveChatPanel />
     }
   };
 

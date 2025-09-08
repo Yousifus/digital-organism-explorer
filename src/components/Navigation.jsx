@@ -12,6 +12,7 @@ import {
   Settings,
   Activity,
   FileText,
+  MessageCircle,
   ChevronRight,
   ChevronDown
 } from 'lucide-react';
@@ -134,6 +135,12 @@ const Navigation = ({ activePanel, onPanelChange, className }) => {
           label: 'Journal',
           icon: FileText,
           description: 'Activity logs and history'
+        },
+        {
+          id: 'livechat',
+          label: 'Live Chat',
+          icon: MessageCircle,
+          description: 'Real AI conversations via LM Studio'
         }
       ]
     }
