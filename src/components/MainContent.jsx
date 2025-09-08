@@ -8,6 +8,7 @@ import PerceptionPanel from './panels/PerceptionPanel';
 import CognitionPanel from './panels/CognitionPanel';
 import ActionPanel from './panels/ActionPanel';
 import MetabolismPanel from './panels/MetabolismPanel';
+import GovernancePanel from './panels/GovernancePanel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -156,9 +157,15 @@ const MainContent = ({ activePanel, onNodeClick, onNodeHover, onPanelChange }) =
     },
     metabolism: {
       title: 'Metabolism & Homeostasis',
-      description: 'Token consumption, resource management, and health monitoring',
+      description: 'Resource consumption, energy management, and health monitoring',
       icon: Heart,
       content: <MetabolismPanel />
+    },
+    governance: {
+      title: 'Governance & Safety',
+      description: 'Security policies, permissions, and comprehensive audit logging',
+      icon: Shield,
+      content: <GovernancePanel />
     }
   };
 
