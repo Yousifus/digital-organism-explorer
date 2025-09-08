@@ -4,6 +4,9 @@ import IdentityPanel from './panels/IdentityPanel';
 import EmbodimentPanel from './panels/EmbodimentPanel';
 import MemoryPanel from './panels/MemoryPanel';
 import TemporalityPanel from './panels/TemporalityPanel';
+import PerceptionPanel from './panels/PerceptionPanel';
+import CognitionPanel from './panels/CognitionPanel';
+import ActionPanel from './panels/ActionPanel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -131,6 +134,24 @@ const MainContent = ({ activePanel, onNodeClick, onNodeHover, onPanelChange }) =
       description: 'Multi-scale temporal awareness and lifecycle management',
       icon: Clock,
       content: <TemporalityPanel />
+    },
+    perception: {
+      title: 'Perception & Input Processing',
+      description: 'Multi-modal sensory input and attention mechanisms',
+      icon: Eye,
+      content: <PerceptionPanel />
+    },
+    cognition: {
+      title: 'Cognition & Reasoning',
+      description: 'Thinking, planning, and decision-making processes',
+      icon: Brain,
+      content: <CognitionPanel />
+    },
+    action: {
+      title: 'Action & Tool Execution',
+      description: 'Safe tool calls and environment interaction',
+      icon: Settings,
+      content: <ActionPanel />
     },
     metabolism: {
       title: 'Metabolism & Homeostasis',
