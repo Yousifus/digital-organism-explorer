@@ -16,6 +16,7 @@ import JournalPanel from './panels/JournalPanel';
 import LiveChatPanel from './panels/LiveChatPanel';
 import ModelManagementPanel from './panels/ModelManagementPanel';
 import ConsciousnessPanel from './panels/ConsciousnessPanel';
+import ActualEvolutionPanel from './panels/ActualEvolutionPanel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -216,6 +217,12 @@ const MainContent = ({ activePanel, onNodeClick, onNodeHover, onPanelChange }) =
       description: 'Real-time consciousness and reasoning visualization',
       icon: Brain,
       content: <ConsciousnessPanel />
+    },
+    actualevolution: {
+      title: 'Actual Evolution System',
+      description: 'Real genetic algorithm-based prompt evolution with A/B testing',
+      icon: GitBranch,
+      content: <ActualEvolutionPanel />
     }
   };
 

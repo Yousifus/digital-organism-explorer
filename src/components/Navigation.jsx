@@ -153,6 +153,12 @@ const Navigation = ({ activePanel, onPanelChange, className }) => {
           label: 'Consciousness Monitor',
           icon: Brain,
           description: 'Real-time consciousness visualization'
+        },
+        {
+          id: 'actualevolution',
+          label: 'Actual Evolution',
+          icon: GitBranch,
+          description: 'Real genetic algorithm-based evolution'
         }
       ]
     }
