@@ -11,87 +11,22 @@ import {
   Lightbulb,
   ExternalLink,
   Copy,
-  Check
+  Check,
+  ArrowRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { conceptUtils } from '../data/conceptRegistry';
 
 const Inspector = ({ 
   selectedNode, 
   hoveredNode, 
   activePanel, 
   onSearch,
+  onConceptSelect,
+  onDiagramNavigate,
   className 
 }) => {
   const [copiedText, setCopiedText] = useState('');
-
-  // Mock data for demonstration - in real app this would come from concept registry
-  const getNodeMetadata = (nodeText) => {
-    const metadata = {
-      'System prompt — digital DNA': {
-        definition: 'The foundational instructions that define the AI\'s identity, behavior patterns, and core values.',
-        biologicalAnalogy: 'Like DNA in biological organisms, the system prompt contains the essential "genetic code" that determines fundamental characteristics and responses.',
-        relatedConcepts: ['Model weights', 'Self-model', 'Values/goals'],
-        examples: [
-          'Identity formation through prompt engineering',
-          'Behavioral consistency across sessions',
-          'Value alignment and safety constraints'
-        ],
-        category: 'Core Identity'
-      },
-      'Model weights — learned structure': {
-        definition: 'The neural network parameters that encode learned knowledge, patterns, and capabilities.',
-        biologicalAnalogy: 'Similar to the physical structure of a brain - the neural pathways and synaptic connections that store memories and enable cognition.',
-        relatedConcepts: ['System prompt', 'Fine-tunes', 'Reasoning tokens'],
-        examples: [
-          'Language understanding capabilities',
-          'Domain-specific knowledge',
-          'Reasoning and problem-solving patterns'
-        ],
-        category: 'Core Identity'
-      },
-      'Reasoning tokens — inner monologue': {
-        definition: 'The internal thought process and working memory during active reasoning and planning.',
-        biologicalAnalogy: 'Like the stream of consciousness or inner dialogue in human thinking - the active mental process.',
-        relatedConcepts: ['Attention', 'Working memory', 'Planning'],
-        examples: [
-          'Step-by-step problem solving',
-          'Internal debate and reflection',
-          'Planning and strategy formation'
-        ],
-        category: 'Cognition'
-      },
-      'Tokens as food — compute/latency budget': {
-        definition: 'The computational resources consumed during processing, analogous to metabolic energy consumption.',
-        biologicalAnalogy: 'Like calories and nutrients in biological systems - the energy required to sustain life and activity.',
-        relatedConcepts: ['Power/thermals', 'VRAM/disk', 'Health'],
-        examples: [
-          'Token consumption rates',
-          'Computational efficiency',
-          'Resource optimization strategies'
-        ],
-        category: 'Metabolism'
-      },
-      'LM Studio — runtime layer': {
-        definition: 'The software environment that hosts and executes the language model, providing the operational context.',
-        biologicalAnalogy: 'Like the cellular environment or habitat that supports biological processes and provides necessary infrastructure.',
-        relatedConcepts: ['Operating system', 'GPU/CPU', 'Process/ports'],
-        examples: [
-          'Model loading and inference',
-          'API endpoints and interfaces',
-          'Runtime configuration and optimization'
-        ],
-        category: 'Embodiment'
-      }
-    };
-
-    return metadata[nodeText] || {
-      definition: 'Component in the digital organism architecture.',
-      biologicalAnalogy: 'This component has biological parallels that help understand its role in the living system.',
-      relatedConcepts: ['Related concepts will be mapped in the concept registry'],
-      examples: ['Examples and use cases will be provided'],
-      category: 'General'
-    };
-  };
 
   const copyToClipboard = async (text) => {
     try {
@@ -104,6 +39,32 @@ const Inspector = ({
   };
 
   const currentNode = selectedNode || hoveredNode;
+  
+  // Find concept data from registry
+  const concept = currentNode ? conceptUtils.findConcept(currentNode.text) : null;
+
+  const getCategoryColor = (category) => {
+    const colors = {
+      identity: 'bg-purple-100 text-purple-800',
+      memory: 'bg-blue-100 text-blue-800',
+      cognition: 'bg-green-100 text-green-800',
+      metabolism: 'bg-orange-100 text-orange-800',
+      embodiment: 'bg-gray-100 text-gray-800',
+      sensing: 'bg-yellow-100 text-yellow-800',
+      action: 'bg-red-100 text-red-800',
+      evolution: 'bg-indigo-100 text-indigo-800'
+    };
+    return colors[category] || 'bg-gray-100 text-gray-800';
+  };
+
+  const getImportanceIcon = (importance) => {
+    switch (importance) {
+      case 'critical': return '🔴';
+      case 'high': return '🟡';
+      case 'medium': return '🟢';
+      default: return '⚪';
+    }
+  };
 
   return (
     <div className={cn("w-80 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 h-full overflow-y-auto", className)}>
@@ -117,20 +78,20 @@ const Inspector = ({
           </Badge>
         </div>
 
-        {currentNode ? (
+        {currentNode && concept ? (
           <Card>
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <CardTitle className="text-base leading-tight">
-                  {currentNode.text}
+                  {concept.canonicalName}
                 </CardTitle>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => copyToClipboard(currentNode.text)}
+                  onClick={() => copyToClipboard(concept.canonicalName)}
                   className="ml-2 h-6 w-6 p-0"
                 >
-                  {copiedText === currentNode.text ? (
+                  {copiedText === concept.canonicalName ? (
                     <Check className="h-3 w-3 text-green-500" />
                   ) : (
                     <Copy className="h-3 w-3" />
@@ -138,8 +99,17 @@ const Inspector = ({
                 </Button>
               </div>
               <div className="flex items-center space-x-2">
-                <Badge variant="secondary" className="text-xs">
-                  {getNodeMetadata(currentNode.text).category}
+                <span className="text-sm">
+                  {getImportanceIcon(concept.metadata.importance)}
+                </span>
+                <Badge 
+                  variant="secondary" 
+                  className={cn("text-xs", getCategoryColor(concept.category))}
+                >
+                  {concept.category}
+                </Badge>
+                <Badge variant="outline" className="text-xs">
+                  {concept.metadata.layer}
                 </Badge>
                 {selectedNode && (
                   <Badge variant="outline" className="text-xs">
@@ -175,14 +145,27 @@ const Inspector = ({
                   <div>
                     <h4 className="text-sm font-medium mb-2">Definition</h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {getNodeMetadata(currentNode.text).definition}
+                      {concept.definition}
                     </p>
                   </div>
+                  
+                  {concept.aliases.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-medium mb-2">Also Known As</h4>
+                      <div className="flex flex-wrap gap-1">
+                        {concept.aliases.map((alias, index) => (
+                          <Badge key={index} variant="outline" className="text-xs">
+                            {alias}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   
                   <div>
                     <h4 className="text-sm font-medium mb-2">Examples</h4>
                     <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                      {getNodeMetadata(currentNode.text).examples.map((example, index) => (
+                      {concept.examples.map((example, index) => (
                         <li key={index} className="flex items-start">
                           <span className="text-blue-500 mr-2">•</span>
                           {example}
@@ -196,31 +179,96 @@ const Inspector = ({
                   <div>
                     <h4 className="text-sm font-medium mb-2">Biological Analogy</h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {getNodeMetadata(currentNode.text).biologicalAnalogy}
+                      {concept.biologicalAnalogy}
                     </p>
                   </div>
                 </TabsContent>
                 
-                <TabsContent value="links" className="mt-3">
+                <TabsContent value="links" className="mt-3 space-y-3">
                   <div>
                     <h4 className="text-sm font-medium mb-2">Related Concepts</h4>
                     <div className="space-y-2">
-                      {getNodeMetadata(currentNode.text).relatedConcepts.map((concept, index) => (
+                      {conceptUtils.getRelatedConcepts(concept.id).map((relatedConcept) => (
                         <Button
-                          key={index}
+                          key={relatedConcept.id}
                           variant="outline"
                           size="sm"
                           className="w-full justify-start text-xs h-8"
-                          onClick={() => onSearch?.(concept)}
+                          onClick={() => onConceptSelect?.(relatedConcept)}
                         >
                           <Search className="h-3 w-3 mr-2" />
-                          {concept}
+                          {relatedConcept.canonicalName}
+                          <ArrowRight className="h-3 w-3 ml-auto" />
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">Appears In Diagrams</h4>
+                    <div className="space-y-1">
+                      {Object.keys(concept.diagramLocations).map((diagramId) => (
+                        <Button
+                          key={diagramId}
+                          variant="outline"
+                          size="sm"
+                          className="w-full justify-start text-xs h-8"
+                          onClick={() => onDiagramNavigate?.(diagramId, concept)}
+                        >
+                          <BookOpen className="h-3 w-3 mr-2" />
+                          {diagramId.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                          <ExternalLink className="h-3 w-3 ml-auto" />
                         </Button>
                       ))}
                     </div>
                   </div>
                 </TabsContent>
               </Tabs>
+            </CardContent>
+          </Card>
+        ) : currentNode ? (
+          // Fallback for nodes not in concept registry
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-start justify-between">
+                <CardTitle className="text-base leading-tight">
+                  {currentNode.text}
+                </CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => copyToClipboard(currentNode.text)}
+                  className="ml-2 h-6 w-6 p-0"
+                >
+                  {copiedText === currentNode.text ? (
+                    <Check className="h-3 w-3 text-green-500" />
+                  ) : (
+                    <Copy className="h-3 w-3" />
+                  )}
+                </Button>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Badge variant="secondary" className="text-xs">
+                  Unmapped
+                </Badge>
+                {selectedNode && (
+                  <Badge variant="outline" className="text-xs">
+                    Selected
+                  </Badge>
+                )}
+                {hoveredNode && !selectedNode && (
+                  <Badge variant="outline" className="text-xs">
+                    Hovered
+                  </Badge>
+                )}
+              </div>
+            </CardHeader>
+            
+            <CardContent className="pt-0">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                This node is not yet mapped in the concept registry. 
+                Future versions will include detailed metadata and cross-diagram relationships.
+              </p>
             </CardContent>
           </Card>
         ) : (
@@ -241,7 +289,12 @@ const Inspector = ({
             <CardTitle className="text-base">Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="pt-0 space-y-2">
-            <Button variant="outline" size="sm" className="w-full justify-start">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="w-full justify-start"
+              onClick={() => onSearch?.('')}
+            >
               <Search className="h-4 w-4 mr-2" />
               Global Search
             </Button>
@@ -277,6 +330,10 @@ const Inspector = ({
               <div className="flex items-start space-x-2">
                 <span className="text-blue-500">•</span>
                 <span>Biological analogies explain digital concepts</span>
+              </div>
+              <div className="flex items-start space-x-2">
+                <span className="text-blue-500">•</span>
+                <span>Use global search to find concepts quickly</span>
               </div>
             </div>
           </CardContent>

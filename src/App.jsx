@@ -2,6 +2,8 @@ import { useState } from 'react'
 import Navigation from './components/Navigation'
 import MainContent from './components/MainContent'
 import Inspector from './components/Inspector'
+import ConceptSearch from './components/ConceptSearch'
+import ConceptHighlighter, { useConceptLinking } from './components/ConceptHighlighter'
 import { Button } from '@/components/ui/button'
 import { Search, Menu, X } from 'lucide-react'
 import './App.css'
@@ -11,17 +13,45 @@ function App() {
   const [selectedNode, setSelectedNode] = useState(null);
   const [hoveredNode, setHoveredNode] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [activeDiagram, setActiveDiagram] = useState('mindmap-v1');
+
+  // Concept linking functionality
+  const {
+    selectedConcept,
+    hoveredConcept,
+    selectConcept,
+    clearSelection,
+    findConceptFromNode,
+    getRelatedConcepts,
+    searchConcepts,
+    setHoveredConcept
+  } = useConceptLinking();
 
   const handleNodeClick = (nodeData) => {
     setSelectedNode(nodeData);
-    console.log('Node clicked:', nodeData);
+    
+    // Find concept from registry
+    const concept = findConceptFromNode(nodeData.text);
+    if (concept) {
+      selectConcept(concept);
+    }
+    
+    console.log('Node clicked:', nodeData, 'Concept:', concept);
   };
 
   const handleNodeHover = (nodeData) => {
     if (nodeData.type === 'enter') {
       setHoveredNode(nodeData);
+      
+      // Find concept from registry
+      const concept = findConceptFromNode(nodeData.text);
+      if (concept) {
+        setHoveredConcept(concept);
+      }
     } else {
       setHoveredNode(null);
+      setHoveredConcept(null);
     }
   };
 
@@ -31,8 +61,43 @@ function App() {
   };
 
   const handleSearch = (searchTerm) => {
-    console.log('Searching for:', searchTerm);
-    // TODO: Implement global search functionality
+    setSearchOpen(true);
+  };
+
+  const handleConceptSelect = (concept) => {
+    selectConcept(concept);
+    setSelectedNode({
+      id: concept.id,
+      text: concept.canonicalName
+    });
+  };
+
+  const handleDiagramNavigate = (diagramId, concept) => {
+    setActiveDiagram(diagramId);
+    selectConcept(concept);
+    
+    // Switch to overview panel to show diagrams
+    if (activePanel !== 'overview') {
+      setActivePanel('overview');
+    }
+    
+    console.log('Navigate to diagram:', diagramId, 'for concept:', concept);
+  };
+
+  const handleConceptHover = (hoverData) => {
+    if (hoverData.type === 'enter') {
+      setHoveredConcept(hoverData.concept);
+    } else {
+      setHoveredConcept(null);
+    }
+  };
+
+  const handleConceptClick = (concept) => {
+    selectConcept(concept);
+    setSelectedNode({
+      id: concept.id,
+      text: concept.canonicalName
+    });
   };
 
   return (
@@ -61,7 +126,12 @@ function App() {
             </div>
             
             <div className="flex items-center space-x-3">
-              <Button variant="outline" size="sm" className="hidden sm:flex">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="hidden sm:flex"
+                onClick={() => setSearchOpen(true)}
+              >
                 <Search className="h-4 w-4 mr-2" />
                 Search
               </Button>
@@ -103,6 +173,8 @@ function App() {
           onNodeClick={handleNodeClick}
           onNodeHover={handleNodeHover}
           onPanelChange={handlePanelChange}
+          activeDiagram={activeDiagram}
+          onDiagramChange={setActiveDiagram}
         />
         
         {/* Right Inspector - Hidden on mobile, collapsible on tablet */}
@@ -112,6 +184,8 @@ function App() {
             hoveredNode={hoveredNode}
             activePanel={activePanel}
             onSearch={handleSearch}
+            onConceptSelect={handleConceptSelect}
+            onDiagramNavigate={handleDiagramNavigate}
             className="h-full"
           />
         </div>
@@ -125,10 +199,28 @@ function App() {
             hoveredNode={hoveredNode}
             activePanel={activePanel}
             onSearch={handleSearch}
+            onConceptSelect={handleConceptSelect}
+            onDiagramNavigate={handleDiagramNavigate}
             className="h-auto"
           />
         </div>
       )}
+
+      {/* Global Concept Search */}
+      <ConceptSearch
+        isOpen={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        onConceptSelect={handleConceptSelect}
+        onDiagramNavigate={handleDiagramNavigate}
+      />
+
+      {/* Concept Highlighter for cross-diagram linking */}
+      <ConceptHighlighter
+        diagramId={activeDiagram}
+        selectedConcept={selectedConcept}
+        onConceptHover={handleConceptHover}
+        onConceptClick={handleConceptClick}
+      />
     </div>
   )
 }
