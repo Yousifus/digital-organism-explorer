@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageCircle, Send, Bot, User, Zap, Activity, Wifi, WifiOff, Loader2 } from 'lucide-react';
+import { MessageCircle, Send, Bot, User, Zap, Activity, Wifi, WifiOff, Loader2, Brain, Database } from 'lucide-react';
 import lmStudioService from '../../services/LMStudioClient';
+import memoryService from '../../services/MemoryService';
 
 const LiveChatPanel = () => {
   const [messages, setMessages] = useState([]);
@@ -12,6 +13,7 @@ const LiveChatPanel = () => {
   const [availableModels, setAvailableModels] = useState({ loaded: [], available: [] });
   const [selectedModel, setSelectedModel] = useState('');
   const [metrics, setMetrics] = useState({});
+  const [memoryStats, setMemoryStats] = useState({});
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -22,7 +24,38 @@ const LiveChatPanel = () => {
       setCurrentModel(status.currentModel);
     });
 
-    // Initial connection attempt
+    // Subscribe to memory service updates
+    const unsubscribeMemory = memoryService.addListener((stats) => {
+      setMemoryStats(stats);
+    });
+
+    // Load conversation history from memory
+    const loadConversationHistory = () => {
+      const history = memoryService.conversationHistory;
+      const formattedMessages = [];
+      
+      history.forEach(turn => {
+        formattedMessages.push({
+          id: `user_${turn.id}`,
+          type: 'user',
+          content: turn.userMessage,
+          timestamp: turn.timestamp
+        });
+        
+        formattedMessages.push({
+          id: `ai_${turn.id}`,
+          type: 'ai',
+          content: turn.aiResponse,
+          timestamp: turn.timestamp,
+          metadata: turn.metadata
+        });
+      });
+      
+      setMessages(formattedMessages);
+    };
+
+    // Initial setup
+    loadConversationHistory();
     handleConnect();
 
     // Metrics update interval
@@ -30,6 +63,7 @@ const LiveChatPanel = () => {
 
     return () => {
       unsubscribe();
+      unsubscribeMemory();
       clearInterval(metricsInterval);
     };
   }, []);
@@ -131,6 +165,18 @@ const LiveChatPanel = () => {
       };
 
       setMessages(prev => [...prev, aiMessage]);
+
+      // Store in memory service
+      memoryService.addConversationTurn(
+        userMessage.content,
+        response.content,
+        {
+          tokens: response.tokens,
+          duration: response.duration,
+          model: currentModel.id
+        }
+      );
+
     } catch (error) {
       const errorMessage = {
         id: Date.now() + 1,
@@ -238,22 +284,50 @@ const LiveChatPanel = () => {
 
         {/* Live Metrics */}
         {isConnected && currentModel && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div className="flex items-center space-x-2">
-              <Zap className="w-4 h-4 text-yellow-500" />
-              <span>{metrics.tokenRate || 0} tok/s</span>
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+              <div className="flex items-center space-x-2">
+                <Zap className="w-4 h-4 text-yellow-500" />
+                <span>{metrics.tokenRate || 0} tok/s</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Activity className="w-4 h-4 text-blue-500" />
+                <span>{metrics.cpuUsage || 0}% CPU</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 bg-purple-500 rounded"></div>
+                <span>{metrics.memoryUsage || 0}% RAM</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 bg-red-500 rounded"></div>
+                <span>{metrics.temperature || 0}°C</span>
+              </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <Activity className="w-4 h-4 text-blue-500" />
-              <span>{metrics.cpuUsage || 0}% CPU</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-purple-500 rounded"></div>
-              <span>{metrics.memoryUsage || 0}% RAM</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-red-500 rounded"></div>
-              <span>{metrics.temperature || 0}°C</span>
+            
+            {/* Memory Stats */}
+            <div className="border-t pt-3">
+              <div className="flex items-center space-x-2 mb-2">
+                <Brain className="w-4 h-4 text-purple-500" />
+                <span className="text-sm font-medium">Memory System</span>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                <div className="flex items-center space-x-1">
+                  <Database className="w-3 h-3 text-blue-500" />
+                  <span>{memoryStats.conversationTurns || 0} conversations</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <div className="w-3 h-3 bg-green-500 rounded"></div>
+                  <span>{memoryStats.episodicMemories || 0} episodes</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <div className="w-3 h-3 bg-orange-500 rounded"></div>
+                  <span>{memoryStats.semanticConcepts || 0} concepts</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <div className="w-3 h-3 bg-pink-500 rounded"></div>
+                  <span>{memoryStats.totalMemorySize || 0}KB stored</span>
+                </div>
+              </div>
             </div>
           </div>
         )}
