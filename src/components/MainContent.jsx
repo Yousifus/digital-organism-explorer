@@ -2,6 +2,8 @@ import { useState } from 'react';
 import DiagramViewer from './DiagramViewer';
 import IdentityPanel from './panels/IdentityPanel';
 import EmbodimentPanel from './panels/EmbodimentPanel';
+import MemoryPanel from './panels/MemoryPanel';
+import TemporalityPanel from './panels/TemporalityPanel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -122,194 +124,13 @@ const MainContent = ({ activePanel, onNodeClick, onNodeHover, onPanelChange }) =
       title: 'Memory Systems',
       description: 'Multi-layered memory architecture for continuity and learning',
       icon: Database,
-      content: (
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Memory Layers</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {[
-                  { name: 'Short-term', desc: 'Context window', color: 'bg-blue-100' },
-                  { name: 'Long-term', desc: 'Vector store', color: 'bg-green-100' },
-                  { name: 'Episodic', desc: 'Event logs', color: 'bg-purple-100' },
-                  { name: 'Semantic', desc: 'Knowledge', color: 'bg-orange-100' },
-                  { name: 'Procedural', desc: 'Skills', color: 'bg-red-100' },
-                  { name: 'Affective', desc: 'Preferences', color: 'bg-pink-100' },
-                  { name: 'Social', desc: 'Relationships', color: 'bg-indigo-100' },
-                  { name: 'Identity', desc: 'Versions', color: 'bg-gray-100' }
-                ].map((memory) => (
-                  <div key={memory.name} className={`p-3 rounded-lg ${memory.color}`}>
-                    <h4 className="font-medium text-sm">{memory.name}</h4>
-                    <p className="text-xs text-gray-600">{memory.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-          <DiagramViewer 
-            onNodeClick={onNodeClick}
-            onNodeHover={onNodeHover}
-          />
-        </div>
-      )
+      content: <MemoryPanel />
     },
-    metabolism: {
-      title: 'Metabolism & Homeostasis',
-      description: 'Token consumption, resource management, and health monitoring',
-      icon: Heart,
-      content: (
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Zap className="h-5 w-5" />
-                <span>Metabolic Dashboard</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-3">
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Token Rate</span>
-                      <span>75 tok/s</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-blue-500 h-2 rounded-full" style={{width: '75%'}}></div>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>VRAM Usage</span>
-                      <span>12.4 GB</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-green-500 h-2 rounded-full" style={{width: '62%'}}></div>
-                    </div>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>CPU Load</span>
-                      <span>45%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-yellow-500 h-2 rounded-full" style={{width: '45%'}}></div>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Temperature</span>
-                      <span>68°C</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-orange-500 h-2 rounded-full" style={{width: '68%'}}></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <DiagramViewer 
-            onNodeClick={onNodeClick}
-            onNodeHover={onNodeHover}
-          />
-        </div>
-      )
-    }
-  };
-
-  // Add placeholder content for other panels
-  const defaultPanelContent = (panelId) => ({
-    title: panelId.charAt(0).toUpperCase() + panelId.slice(1),
-    description: `${panelId} system components and functionality`,
-    icon: Activity,
-    content: (
-      <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>{panelId.charAt(0).toUpperCase() + panelId.slice(1)} System</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              This panel will contain detailed information about the {panelId} system components, 
-              interactions, and biological analogies. Implementation coming in future phases.
-            </p>
-            <Badge variant="outline">Coming Soon</Badge>
-          </CardContent>
-        </Card>
-        <DiagramViewer 
-          onNodeClick={onNodeClick}
-          onNodeHover={onNodeHover}
-        />
-      </div>
-    )
-  });
-
-  const currentPanel = panelContent[activePanel] || defaultPanelContent(activePanel);
-  const PanelIcon = currentPanel.icon;
-
-  return (
-    <div className="flex-1 p-6 overflow-y-auto">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-6">
-          <div className="flex items-center space-x-3 mb-2">
-            <PanelIcon className="h-6 w-6 text-blue-600" />
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              {currentPanel.title}
-            </h1>
-          </div>
-          <p className="text-gray-600 dark:text-gray-400">
-            {currentPanel.description}
-          </p>
-        </div>
-        
-        {currentPanel.content}
-      </div>
-    </div>
-  );
-};
-
-export default MainContent;
-    memory: {
-      title: 'Memory Systems',
-      description: 'Multi-layered memory architecture for continuity and learning',
-      icon: Database,
-      content: (
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Memory Layers</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {[
-                  { name: 'Short-term', desc: 'Context window', color: 'bg-blue-100' },
-                  { name: 'Long-term', desc: 'Vector store', color: 'bg-green-100' },
-                  { name: 'Episodic', desc: 'Event logs', color: 'bg-purple-100' },
-                  { name: 'Semantic', desc: 'Knowledge', color: 'bg-orange-100' },
-                  { name: 'Procedural', desc: 'Skills', color: 'bg-red-100' },
-                  { name: 'Affective', desc: 'Preferences', color: 'bg-pink-100' },
-                  { name: 'Social', desc: 'Relationships', color: 'bg-indigo-100' },
-                  { name: 'Identity', desc: 'Versions', color: 'bg-gray-100' }
-                ].map((memory) => (
-                  <div key={memory.name} className={`p-3 rounded-lg ${memory.color}`}>
-                    <h4 className="font-medium text-sm">{memory.name}</h4>
-                    <p className="text-xs text-gray-600">{memory.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-          <DiagramViewer 
-            onNodeClick={onNodeClick}
-            onNodeHover={onNodeHover}
-          />
-        </div>
-      )
+    temporality: {
+      title: 'Temporality & Time Sense',
+      description: 'Multi-scale temporal awareness and lifecycle management',
+      icon: Clock,
+      content: <TemporalityPanel />
     },
     metabolism: {
       title: 'Metabolism & Homeostasis',
