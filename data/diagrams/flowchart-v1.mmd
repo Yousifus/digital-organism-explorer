@@ -1,0 +1,24 @@
+---
+config:
+  theme: default
+  layout: elk
+---
+flowchart TD
+ subgraph Runtime["**Runtime**"]
+        R1["LM Studio / OS / GPU-CPU"]
+  end
+    A["**Inputs:**
+     tokens, files, sensors"] --> B{"**Reasoning tokens and planning**"}
+    B -- **Plan** --> C["**Tool call via MCP**"]
+    B -- **Respond** --> D["**Output tokens**"]
+    C --> E["**Environment effects:** 
+     files and APIs"]
+    E --> F["**Memory update:**
+     short, long, episodic"]
+    F --> H{"**System  or config edits**"} & B
+    H --> I["**Version and backup**"]
+    D --> G["**Human feedback**"]
+    G --> B
+    B --- R1
+    C --- R1
+    D --- R1
