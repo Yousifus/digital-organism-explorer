@@ -1,10 +1,4 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Progress } from '@/components/ui/progress';
-import { Slider } from '@/components/ui/slider';
+import React, { useState, useEffect } from 'react';
 import { 
   Activity, 
   Zap, 
@@ -27,541 +21,563 @@ import {
   RotateCcw,
   Target,
   Clock,
-  BarChart3
+  BarChart3,
+  Brain,
+  Shield
 } from 'lucide-react';
+import metabolismService from '../../services/MetabolismService';
 
 const MetabolismPanel = () => {
   const [activeTab, setActiveTab] = useState('overview');
-  const [isSimulating, setIsSimulating] = useState(true);
-  const [metabolicRate, setMetabolicRate] = useState([75]);
-  const [workload, setWorkload] = useState([60]);
-  const [efficiency, setEfficiency] = useState([85]);
-
-  // Simulated real-time metrics
-  const [metrics, setMetrics] = useState({
-    tokenRate: 45.2,
-    cpuUsage: 68,
-    gpuUsage: 82,
-    memoryUsage: 74,
-    storageUsage: 45,
-    temperature: 72,
-    powerDraw: 285,
-    networkIO: 12.4,
-    diskIO: 8.7
-  });
+  const [metrics, setMetrics] = useState({});
+  const [health, setHealth] = useState({});
+  const [isMonitoring, setIsMonitoring] = useState(false);
+  const [performanceHistory, setPerformanceHistory] = useState([]);
 
   useEffect(() => {
-    if (isSimulating) {
-      const timer = setInterval(() => {
-        setMetrics(prev => ({
-          tokenRate: Math.max(20, Math.min(100, prev.tokenRate + (Math.random() - 0.5) * 5)),
-          cpuUsage: Math.max(30, Math.min(95, prev.cpuUsage + (Math.random() - 0.5) * 8)),
-          gpuUsage: Math.max(40, Math.min(98, prev.gpuUsage + (Math.random() - 0.5) * 6)),
-          memoryUsage: Math.max(50, Math.min(90, prev.memoryUsage + (Math.random() - 0.5) * 4)),
-          storageUsage: Math.max(30, Math.min(80, prev.storageUsage + (Math.random() - 0.5) * 2)),
-          temperature: Math.max(65, Math.min(85, prev.temperature + (Math.random() - 0.5) * 3)),
-          powerDraw: Math.max(200, Math.min(400, prev.powerDraw + (Math.random() - 0.5) * 20)),
-          networkIO: Math.max(5, Math.min(25, prev.networkIO + (Math.random() - 0.5) * 2)),
-          diskIO: Math.max(2, Math.min(15, prev.diskIO + (Math.random() - 0.5) * 1.5))
-        }));
-      }, 1500);
+    // Subscribe to metabolism service updates
+    const unsubscribe = metabolismService.addListener((newMetrics) => {
+      setMetrics(newMetrics);
+      setHealth(newMetrics.health || {});
+      setIsMonitoring(newMetrics.isMonitoring);
+      setPerformanceHistory(newMetrics.history || []);
+    });
 
-      return () => clearInterval(timer);
-    }
-  }, [isSimulating, metabolicRate, workload, efficiency]);
+    // Initial metrics load
+    const initialMetrics = metabolismService.getMetrics();
+    setMetrics(initialMetrics);
+    setHealth(initialMetrics.health || {});
+    setIsMonitoring(initialMetrics.isMonitoring);
 
-  const resourceMetrics = [
-    {
-      name: 'Token Generation Rate',
-      value: metrics.tokenRate,
-      unit: 'tokens/s',
-      icon: Zap,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-100',
-      description: 'Rate of token production (digital metabolism)',
-      optimal: [40, 80],
-      biological: 'Cellular energy production rate'
-    },
-    {
-      name: 'CPU Usage',
-      value: metrics.cpuUsage,
-      unit: '%',
-      icon: Cpu,
-      color: 'text-green-600',
-      bgColor: 'bg-green-100',
-      description: 'Central processing unit utilization',
-      optimal: [50, 85],
-      biological: 'Brain cortex activity level'
-    },
-    {
-      name: 'GPU Usage',
-      value: metrics.gpuUsage,
-      unit: '%',
-      icon: Activity,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-100',
-      description: 'Graphics processing unit utilization',
-      optimal: [60, 90],
-      biological: 'Neural network firing rate'
-    },
-    {
-      name: 'Memory Usage',
-      value: metrics.memoryUsage,
-      unit: '%',
-      icon: MemoryStick,
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-100',
-      description: 'Random access memory utilization',
-      optimal: [40, 80],
-      biological: 'Working memory capacity'
-    },
-    {
-      name: 'Storage Usage',
-      value: metrics.storageUsage,
-      unit: '%',
-      icon: HardDrive,
-      color: 'text-indigo-600',
-      bgColor: 'bg-indigo-100',
-      description: 'Persistent storage utilization',
-      optimal: [20, 70],
-      biological: 'Long-term memory storage'
-    },
-    {
-      name: 'Temperature',
-      value: metrics.temperature,
-      unit: '°C',
-      icon: Thermometer,
-      color: 'text-red-600',
-      bgColor: 'bg-red-100',
-      description: 'System thermal state',
-      optimal: [65, 75],
-      biological: 'Body temperature regulation'
-    }
-  ];
+    return unsubscribe;
+  }, []);
 
-  const homeostasisSystems = [
-    {
-      name: 'Thermal Regulation',
-      description: 'Temperature control and cooling',
-      status: metrics.temperature > 80 ? 'stressed' : metrics.temperature > 75 ? 'active' : 'stable',
-      efficiency: Math.max(60, 100 - (metrics.temperature - 65) * 2),
-      mechanism: 'Dynamic frequency scaling and fan control',
-      biological: 'Sweating and vasodilation'
-    },
-    {
-      name: 'Load Balancing',
-      description: 'Workload distribution optimization',
-      status: metrics.cpuUsage > 90 ? 'stressed' : metrics.cpuUsage > 80 ? 'active' : 'stable',
-      efficiency: Math.max(70, 100 - Math.max(0, metrics.cpuUsage - 70)),
-      mechanism: 'Task scheduling and priority management',
-      biological: 'Metabolic pathway switching'
-    },
-    {
-      name: 'Memory Management',
-      description: 'Memory allocation and garbage collection',
-      status: metrics.memoryUsage > 85 ? 'stressed' : metrics.memoryUsage > 75 ? 'active' : 'stable',
-      efficiency: Math.max(75, 100 - Math.max(0, metrics.memoryUsage - 60)),
-      mechanism: 'Automatic memory cleanup and optimization',
-      biological: 'Cellular waste removal'
-    },
-    {
-      name: 'Power Management',
-      description: 'Energy consumption optimization',
-      status: metrics.powerDraw > 350 ? 'stressed' : metrics.powerDraw > 300 ? 'active' : 'stable',
-      efficiency: Math.max(65, 100 - Math.max(0, (metrics.powerDraw - 250) / 2)),
-      mechanism: 'Dynamic voltage and frequency scaling',
-      biological: 'Metabolic rate adjustment'
-    }
-  ];
-
-  const metabolicStates = [
-    {
-      name: 'Resting',
-      description: 'Minimal activity, conservation mode',
-      tokenRate: [20, 40],
-      cpuUsage: [30, 50],
-      powerDraw: [200, 250],
-      color: 'bg-blue-100 text-blue-800'
-    },
-    {
-      name: 'Active',
-      description: 'Normal operation, balanced performance',
-      tokenRate: [40, 70],
-      cpuUsage: [50, 80],
-      powerDraw: [250, 320],
-      color: 'bg-green-100 text-green-800'
-    },
-    {
-      name: 'Intensive',
-      description: 'High performance, maximum output',
-      tokenRate: [70, 100],
-      cpuUsage: [80, 95],
-      powerDraw: [320, 400],
-      color: 'bg-orange-100 text-orange-800'
-    },
-    {
-      name: 'Stressed',
-      description: 'Overload condition, emergency mode',
-      tokenRate: [10, 30],
-      cpuUsage: [95, 100],
-      powerDraw: [350, 450],
-      color: 'bg-red-100 text-red-800'
-    }
-  ];
-
-  const getCurrentState = () => {
-    if (metrics.cpuUsage > 95 || metrics.temperature > 80) return metabolicStates[3]; // Stressed
-    if (metrics.cpuUsage > 80 || metrics.tokenRate > 70) return metabolicStates[2]; // Intensive
-    if (metrics.cpuUsage > 50 || metrics.tokenRate > 40) return metabolicStates[1]; // Active
-    return metabolicStates[0]; // Resting
+  const getStatusColor = (value, thresholds) => {
+    if (value >= thresholds.critical) return 'text-red-500';
+    if (value >= thresholds.high) return 'text-orange-500';
+    if (value >= thresholds.normal) return 'text-yellow-500';
+    return 'text-green-500';
   };
 
-  const getHealthStatus = () => {
-    const issues = [];
-    if (metrics.temperature > 80) issues.push('High temperature');
-    if (metrics.cpuUsage > 95) issues.push('CPU overload');
-    if (metrics.memoryUsage > 90) issues.push('Memory pressure');
-    if (metrics.powerDraw > 380) issues.push('High power consumption');
-
-    if (issues.length === 0) return { status: 'Excellent', color: 'text-green-600', icon: CheckCircle };
-    if (issues.length <= 2) return { status: 'Good', color: 'text-yellow-600', icon: AlertTriangle };
-    return { status: 'Critical', color: 'text-red-600', icon: AlertTriangle };
+  const getStatusBadge = (status) => {
+    const badges = {
+      healthy: { color: 'bg-green-500', icon: CheckCircle, text: 'Healthy' },
+      warning: { color: 'bg-yellow-500', icon: AlertTriangle, text: 'Warning' },
+      critical: { color: 'bg-red-500', icon: AlertTriangle, text: 'Critical' }
+    };
+    
+    const badge = badges[status] || badges.healthy;
+    const Icon = badge.icon;
+    
+    return (
+      <div className={`inline-flex items-center space-x-1 px-2 py-1 rounded text-white text-xs ${badge.color}`}>
+        <Icon className="w-3 h-3" />
+        <span>{badge.text}</span>
+      </div>
+    );
   };
 
-  const healthStatus = getHealthStatus();
-  const currentState = getCurrentState();
+  const getMetabolicStateInfo = (state) => {
+    const states = {
+      resting: { 
+        color: 'text-blue-500', 
+        icon: Snowflake, 
+        description: 'Conservation mode - minimal energy consumption',
+        range: '20-40 tok/s, 30-50% CPU'
+      },
+      active: { 
+        color: 'text-green-500', 
+        icon: Activity, 
+        description: 'Normal operation - balanced performance',
+        range: '40-70 tok/s, 50-80% CPU'
+      },
+      intensive: { 
+        color: 'text-orange-500', 
+        icon: Flame, 
+        description: 'High performance - maximum throughput',
+        range: '70-100 tok/s, 80-95% CPU'
+      },
+      stressed: { 
+        color: 'text-red-500', 
+        icon: AlertTriangle, 
+        description: 'Emergency mode - system under stress',
+        range: '10-30 tok/s, 95-100% CPU'
+      }
+    };
+    
+    return states[state] || states.active;
+  };
+
+  const formatUptime = (ms) => {
+    const seconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    
+    if (hours > 0) return `${hours}h ${minutes % 60}m`;
+    if (minutes > 0) return `${minutes}m ${seconds % 60}s`;
+    return `${seconds}s`;
+  };
+
+  const toggleMonitoring = () => {
+    if (isMonitoring) {
+      metabolismService.stopMonitoring();
+    } else {
+      metabolismService.startMonitoring();
+    }
+  };
+
+  const stateInfo = getMetabolicStateInfo(metrics.metabolicState);
+  const StateIcon = stateInfo.icon;
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-semibold mb-2">Metabolism & Homeostasis</h2>
-          <p className="text-gray-600 dark:text-gray-400">
-            Resource consumption, energy management, and health monitoring
-          </p>
+        <div className="flex items-center space-x-3">
+          <div className="p-2 bg-orange-100 rounded-lg">
+            <Heart className="w-6 h-6 text-orange-600" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold">Digital Metabolism</h2>
+            <p className="text-sm text-gray-600">Real-time resource monitoring and optimization</p>
+          </div>
         </div>
-        <div className="flex items-center space-x-2">
-          <Badge className={currentState.color}>
-            {currentState.name}
-          </Badge>
-          <Badge className={isSimulating ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}>
-            {isSimulating ? "Live" : "Paused"}
-          </Badge>
-          <Button variant="outline" size="sm" onClick={() => setIsSimulating(!isSimulating)}>
-            {isSimulating ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-          </Button>
+        
+        <div className="flex items-center space-x-3">
+          {getStatusBadge(health.status)}
+          <button
+            onClick={toggleMonitoring}
+            className={`flex items-center space-x-2 px-3 py-2 rounded text-sm font-medium ${
+              isMonitoring 
+                ? 'bg-red-100 text-red-700 hover:bg-red-200' 
+                : 'bg-green-100 text-green-700 hover:bg-green-200'
+            }`}
+          >
+            {isMonitoring ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+            <span>{isMonitoring ? 'Pause' : 'Start'} Monitoring</span>
+          </button>
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="resources">Resources</TabsTrigger>
-          <TabsTrigger value="homeostasis">Homeostasis</TabsTrigger>
-          <TabsTrigger value="simulation">Simulation</TabsTrigger>
-        </TabsList>
+      {/* Tabs */}
+      <div className="border-b">
+        <nav className="flex space-x-8">
+          {[
+            { id: 'overview', label: 'Overview', icon: Gauge },
+            { id: 'resources', label: 'Resources', icon: Cpu },
+            { id: 'performance', label: 'Performance', icon: TrendingUp },
+            { id: 'health', label: 'Health', icon: Heart },
+            { id: 'optimization', label: 'Optimization', icon: Settings }
+          ].map(tab => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center space-x-2 py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === tab.id
+                    ? 'border-orange-500 text-orange-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+      </div>
 
-        <TabsContent value="overview" className="space-y-4">
-          <div className="grid md:grid-cols-2 gap-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Heart className="h-5 w-5" />
-                  <span>Metabolic Status</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="text-center">
-                    <div className={`text-3xl font-bold ${currentState.color.replace('bg-', 'text-').replace('-100', '-600')}`}>
-                      {currentState.name}
-                    </div>
-                    <p className="text-sm text-gray-600 mt-1">
-                      {currentState.description}
-                    </p>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center">
-                      <h4 className="font-medium mb-1">Token Rate</h4>
-                      <p className="text-xl font-bold text-blue-600">{metrics.tokenRate.toFixed(1)}</p>
-                      <p className="text-xs text-gray-500">tokens/sec</p>
-                    </div>
-                    <div className="text-center">
-                      <h4 className="font-medium mb-1">Power Draw</h4>
-                      <p className="text-xl font-bold text-orange-600">{metrics.powerDraw.toFixed(0)}</p>
-                      <p className="text-xs text-gray-500">watts</p>
-                    </div>
-                  </div>
-
-                  <div className="pt-2 border-t">
-                    <div className="flex items-center space-x-2">
-                      <healthStatus.icon className={`h-4 w-4 ${healthStatus.color}`} />
-                      <span className="text-sm font-medium">Health: {healthStatus.status}</span>
-                    </div>
-                  </div>
+      {/* Tab Content */}
+      {activeTab === 'overview' && (
+        <div className="space-y-6">
+          {/* Current State */}
+          <div className="bg-white rounded-lg border p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Current Metabolic State</h3>
+              <div className="flex items-center space-x-2">
+                <StateIcon className={`w-5 h-5 ${stateInfo.color}`} />
+                <span className={`font-medium ${stateInfo.color}`}>
+                  {(metrics.metabolicState || 'active').charAt(0).toUpperCase() + (metrics.metabolicState || 'active').slice(1)}
+                </span>
+              </div>
+            </div>
+            
+            <p className="text-gray-600 mb-4">{stateInfo.description}</p>
+            <p className="text-sm text-gray-500">{stateInfo.range}</p>
+            
+            {/* Key Metrics Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+              <div className="text-center">
+                <div className="flex items-center justify-center space-x-1 mb-1">
+                  <Zap className="w-4 h-4 text-yellow-500" />
+                  <span className="text-2xl font-bold">{metrics.tokenRate || 0}</span>
+                  <span className="text-sm text-gray-500">tok/s</span>
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Gauge className="h-5 w-5" />
-                  <span>Resource Overview</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {resourceMetrics.slice(0, 4).map((metric, index) => {
-                    const Icon = metric.icon;
-                    const isOptimal = metric.value >= metric.optimal[0] && metric.value <= metric.optimal[1];
-                    return (
-                      <div key={index} className="flex items-center space-x-3">
-                        <div className={`p-2 rounded ${metric.bgColor}`}>
-                          <Icon className={`h-4 w-4 ${metric.color}`} />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex justify-between text-sm mb-1">
-                            <span className="font-medium">{metric.name}</span>
-                            <span>{metric.value.toFixed(1)}{metric.unit}</span>
-                          </div>
-                          <Progress value={metric.value} className="h-2" />
-                        </div>
-                        <div className={`w-2 h-2 rounded-full ${isOptimal ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
-                      </div>
-                    );
-                  })}
+                <p className="text-xs text-gray-500">Token Rate</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="flex items-center justify-center space-x-1 mb-1">
+                  <Cpu className="w-4 h-4 text-blue-500" />
+                  <span className="text-2xl font-bold">{Math.round(metrics.cpuUsage || 0)}</span>
+                  <span className="text-sm text-gray-500">%</span>
                 </div>
-              </CardContent>
-            </Card>
+                <p className="text-xs text-gray-500">CPU Usage</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="flex items-center justify-center space-x-1 mb-1">
+                  <Thermometer className="w-4 h-4 text-red-500" />
+                  <span className="text-2xl font-bold">{Math.round(metrics.cpuTemperature || 0)}</span>
+                  <span className="text-sm text-gray-500">°C</span>
+                </div>
+                <p className="text-xs text-gray-500">Temperature</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="flex items-center justify-center space-x-1 mb-1">
+                  <Battery className="w-4 h-4 text-green-500" />
+                  <span className="text-2xl font-bold">{Math.round(metrics.powerConsumption || 0)}</span>
+                  <span className="text-sm text-gray-500">W</span>
+                </div>
+                <p className="text-xs text-gray-500">Power Draw</p>
+              </div>
+            </div>
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Activity className="h-5 w-5" />
-                <span>Metabolic States</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-4 gap-4">
-                {metabolicStates.map((state, index) => (
-                  <div key={index} className={`border rounded-lg p-4 ${
-                    currentState.name === state.name ? 'ring-2 ring-blue-500' : ''
-                  }`}>
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Badge className={state.color}>
-                        {state.name}
-                      </Badge>
-                      {currentState.name === state.name && (
-                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                      )}
+          {/* Health Score */}
+          <div className="bg-white rounded-lg border p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">System Health</h3>
+              <div className="text-2xl font-bold text-green-600">{health.score || 0}%</div>
+            </div>
+            
+            <div className="space-y-3">
+              <div>
+                <div className="flex justify-between text-sm mb-1">
+                  <span>Efficiency</span>
+                  <span>{metrics.efficiency || 0}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${metrics.efficiency || 0}%` }}
+                  ></div>
+                </div>
+              </div>
+              
+              <div>
+                <div className="flex justify-between text-sm mb-1">
+                  <span>Stability</span>
+                  <span>{metrics.stability || 0}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-green-500 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${metrics.stability || 0}%` }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'resources' && (
+        <div className="space-y-6">
+          {/* Resource Usage */}
+          <div className="bg-white rounded-lg border p-6">
+            <h3 className="text-lg font-semibold mb-4">Resource Utilization</h3>
+            
+            <div className="space-y-4">
+              {[
+                { label: 'CPU Usage', value: metrics.cpuUsage || 0, icon: Cpu, color: 'blue', unit: '%' },
+                { label: 'GPU Usage', value: metrics.gpuUsage || 0, icon: Activity, color: 'purple', unit: '%' },
+                { label: 'Memory Usage', value: metrics.memoryUsage || 0, icon: MemoryStick, color: 'green', unit: '%' },
+                { label: 'VRAM Usage', value: metrics.vramUsage || 0, icon: HardDrive, color: 'orange', unit: '%' }
+              ].map(resource => {
+                const Icon = resource.icon;
+                return (
+                  <div key={resource.label}>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center space-x-2">
+                        <Icon className={`w-4 h-4 text-${resource.color}-500`} />
+                        <span className="text-sm font-medium">{resource.label}</span>
+                      </div>
+                      <span className="text-sm font-bold">{Math.round(resource.value)}{resource.unit}</span>
                     </div>
-                    <p className="text-sm text-gray-600 mb-3">
-                      {state.description}
-                    </p>
-                    <div className="space-y-1 text-xs">
-                      <div>Token Rate: {state.tokenRate[0]}-{state.tokenRate[1]}/s</div>
-                      <div>CPU: {state.cpuUsage[0]}-{state.cpuUsage[1]}%</div>
-                      <div>Power: {state.powerDraw[0]}-{state.powerDraw[1]}W</div>
+                    <div className="w-full bg-gray-200 rounded-full h-3">
+                      <div 
+                        className={`bg-${resource.color}-500 h-3 rounded-full transition-all duration-300`}
+                        style={{ width: `${Math.min(100, resource.value)}%` }}
+                      ></div>
                     </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Temperature Monitoring */}
+          <div className="bg-white rounded-lg border p-6">
+            <h3 className="text-lg font-semibold mb-4">Temperature Monitoring</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-center space-x-2 mb-2">
+                  <Cpu className="w-5 h-5 text-blue-500" />
+                  <span className="font-medium">CPU Temperature</span>
+                </div>
+                <div className="text-3xl font-bold text-blue-600 mb-1">
+                  {Math.round(metrics.cpuTemperature || 0)}°C
+                </div>
+                <div className="text-xs text-gray-500">
+                  {metrics.cpuTemperature > 80 ? 'High' : metrics.cpuTemperature > 60 ? 'Normal' : 'Cool'}
+                </div>
+              </div>
+              
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-center space-x-2 mb-2">
+                  <Activity className="w-5 h-5 text-purple-500" />
+                  <span className="font-medium">GPU Temperature</span>
+                </div>
+                <div className="text-3xl font-bold text-purple-600 mb-1">
+                  {Math.round(metrics.gpuTemperature || 0)}°C
+                </div>
+                <div className="text-xs text-gray-500">
+                  {metrics.gpuTemperature > 85 ? 'High' : metrics.gpuTemperature > 65 ? 'Normal' : 'Cool'}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'performance' && (
+        <div className="space-y-6">
+          {/* Performance Metrics */}
+          <div className="bg-white rounded-lg border p-6">
+            <h3 className="text-lg font-semibold mb-4">Performance Metrics</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-center space-x-2 mb-2">
+                  <TrendingUp className="w-5 h-5 text-green-500" />
+                  <span className="font-medium">Inference Speed</span>
+                </div>
+                <div className="text-2xl font-bold text-green-600 mb-1">
+                  {Math.round(metrics.inferenceSpeed || 0)} tok/s
+                </div>
+                <div className="text-xs text-gray-500">Current throughput</div>
+              </div>
+              
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-center space-x-2 mb-2">
+                  <Clock className="w-5 h-5 text-blue-500" />
+                  <span className="font-medium">Latency</span>
+                </div>
+                <div className="text-2xl font-bold text-blue-600 mb-1">
+                  {Math.round(metrics.latency || 0)}ms
+                </div>
+                <div className="text-xs text-gray-500">Response time</div>
+              </div>
+              
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-center space-x-2 mb-2">
+                  <Zap className="w-5 h-5 text-yellow-500" />
+                  <span className="font-medium">Token Efficiency</span>
+                </div>
+                <div className="text-2xl font-bold text-yellow-600 mb-1">
+                  {(metrics.tokenEfficiency || 0).toFixed(3)}
+                </div>
+                <div className="text-xs text-gray-500">Tokens per watt</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Performance History */}
+          {performanceHistory.length > 0 && (
+            <div className="bg-white rounded-lg border p-6">
+              <h3 className="text-lg font-semibold mb-4">Performance History</h3>
+              <div className="text-sm text-gray-500 mb-4">
+                Last {performanceHistory.length} measurements (live updates every 1.5s)
+              </div>
+              
+              {/* Simple performance visualization */}
+              <div className="space-y-3">
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span>Token Rate Trend</span>
+                    <span>Current: {metrics.tokenRate || 0} tok/s</span>
+                  </div>
+                  <div className="flex items-end space-x-1 h-16 bg-gray-50 rounded p-2">
+                    {performanceHistory.slice(-20).map((point, index) => (
+                      <div
+                        key={index}
+                        className="bg-yellow-500 rounded-t"
+                        style={{
+                          height: `${Math.max(2, (point.tokenRate / 100) * 100)}%`,
+                          width: '4px'
+                        }}
+                      ></div>
+                    ))}
+                  </div>
+                </div>
+                
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span>CPU Usage Trend</span>
+                    <span>Current: {Math.round(metrics.cpuUsage || 0)}%</span>
+                  </div>
+                  <div className="flex items-end space-x-1 h-16 bg-gray-50 rounded p-2">
+                    {performanceHistory.slice(-20).map((point, index) => (
+                      <div
+                        key={index}
+                        className="bg-blue-500 rounded-t"
+                        style={{
+                          height: `${Math.max(2, point.cpuUsage)}%`,
+                          width: '4px'
+                        }}
+                      ></div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'health' && (
+        <div className="space-y-6">
+          {/* Health Assessment */}
+          <div className="bg-white rounded-lg border p-6">
+            <h3 className="text-lg font-semibold mb-4">Health Assessment</h3>
+            
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <div className="text-3xl font-bold text-green-600 mb-1">{health.score || 0}%</div>
+                <div className="text-sm text-gray-500">Overall Health Score</div>
+              </div>
+              {getStatusBadge(health.status)}
+            </div>
+
+            {/* Issues and Warnings */}
+            {health.issues && health.issues.length > 0 && (
+              <div className="mb-4">
+                <h4 className="font-medium text-red-600 mb-2 flex items-center">
+                  <AlertTriangle className="w-4 h-4 mr-2" />
+                  Critical Issues
+                </h4>
+                <ul className="space-y-1">
+                  {health.issues.map((issue, index) => (
+                    <li key={index} className="text-sm text-red-600 flex items-center">
+                      <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
+                      {issue}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {health.warnings && health.warnings.length > 0 && (
+              <div className="mb-4">
+                <h4 className="font-medium text-yellow-600 mb-2 flex items-center">
+                  <AlertTriangle className="w-4 h-4 mr-2" />
+                  Warnings
+                </h4>
+                <ul className="space-y-1">
+                  {health.warnings.map((warning, index) => (
+                    <li key={index} className="text-sm text-yellow-600 flex items-center">
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
+                      {warning}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {(!health.issues || health.issues.length === 0) && (!health.warnings || health.warnings.length === 0) && (
+              <div className="flex items-center text-green-600">
+                <CheckCircle className="w-5 h-5 mr-2" />
+                <span>All systems operating normally</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'optimization' && (
+        <div className="space-y-6">
+          {/* Optimization Recommendations */}
+          <div className="bg-white rounded-lg border p-6">
+            <h3 className="text-lg font-semibold mb-4">Optimization Recommendations</h3>
+            
+            {health.recommendations && health.recommendations.length > 0 ? (
+              <div className="space-y-3">
+                {health.recommendations.map((rec, index) => (
+                  <div key={index} className="p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium capitalize">{rec.type} Optimization</span>
+                      <span className={`text-xs px-2 py-1 rounded ${
+                        rec.severity === 'critical' ? 'bg-red-100 text-red-700' :
+                        rec.severity === 'high' ? 'bg-orange-100 text-orange-700' :
+                        'bg-yellow-100 text-yellow-700'
+                      }`}>
+                        {rec.severity}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600">{rec.message}</p>
                   </div>
                 ))}
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="resources" className="space-y-4">
-          <div className="grid gap-4">
-            {resourceMetrics.map((metric, index) => {
-              const Icon = metric.icon;
-              const isOptimal = metric.value >= metric.optimal[0] && metric.value <= metric.optimal[1];
-              return (
-                <Card key={index}>
-                  <CardContent className="p-4">
-                    <div className="flex items-center space-x-4">
-                      <div className={`p-3 rounded-lg ${metric.bgColor}`}>
-                        <Icon className={`h-6 w-6 ${metric.color}`} />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-medium">{metric.name}</h4>
-                          <div className="flex items-center space-x-2">
-                            <span className="text-lg font-bold">{metric.value.toFixed(1)}{metric.unit}</span>
-                            <Badge className={isOptimal ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
-                              {isOptimal ? 'Optimal' : 'Suboptimal'}
-                            </Badge>
-                          </div>
-                        </div>
-                        <Progress value={metric.value} className="h-3 mb-2" />
-                        <div className="flex justify-between text-sm text-gray-600">
-                          <span>{metric.description}</span>
-                          <span>Optimal: {metric.optimal[0]}-{metric.optimal[1]}{metric.unit}</span>
-                        </div>
-                        <p className="text-xs text-gray-500 mt-1">
-                          <strong>Biological analogy:</strong> {metric.biological}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <Target className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                <p>System is running optimally</p>
+                <p className="text-sm">No optimization recommendations at this time</p>
+              </div>
+            )}
           </div>
-        </TabsContent>
 
-        <TabsContent value="homeostasis" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Target className="h-5 w-5" />
-                <span>Homeostatic Systems</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {homeostasisSystems.map((system, index) => (
-                  <div key={index} className="border rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <div>
-                        <h4 className="font-medium">{system.name}</h4>
-                        <p className="text-sm text-gray-600">{system.description}</p>
-                      </div>
-                      <div className="text-right">
-                        <Badge className={`${
-                          system.status === 'stable' ? 'bg-green-100 text-green-800' :
-                          system.status === 'active' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-red-100 text-red-800'
-                        }`}>
-                          {system.status}
-                        </Badge>
-                        <p className="text-sm text-gray-500 mt-1">{system.efficiency.toFixed(0)}% efficiency</p>
-                      </div>
-                    </div>
-                    
-                    <Progress value={system.efficiency} className="h-2 mb-3" />
-                    
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="text-gray-600">Mechanism:</span>
-                        <span className="ml-2 font-medium">{system.mechanism}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-600">Biological:</span>
-                        <span className="ml-2 font-medium">{system.biological}</span>
-                      </div>
-                    </div>
+          {/* Monitoring Controls */}
+          <div className="bg-white rounded-lg border p-6">
+            <h3 className="text-lg font-semibold mb-4">Monitoring Controls</h3>
+            
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-medium">Real-time Monitoring</div>
+                  <div className="text-sm text-gray-500">
+                    {isMonitoring ? 'Active - updating every 1.5 seconds' : 'Paused - click to resume'}
                   </div>
-                ))}
+                </div>
+                <button
+                  onClick={toggleMonitoring}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded font-medium ${
+                    isMonitoring 
+                      ? 'bg-red-100 text-red-700 hover:bg-red-200' 
+                      : 'bg-green-100 text-green-700 hover:bg-green-200'
+                  }`}
+                >
+                  {isMonitoring ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                  <span>{isMonitoring ? 'Pause' : 'Resume'}</span>
+                </button>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="simulation" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Settings className="h-5 w-5" />
-                <span>Metabolism Simulation</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">
-                    Metabolic Rate: {metabolicRate[0]}%
-                  </label>
-                  <Slider
-                    value={metabolicRate}
-                    onValueChange={setMetabolicRate}
-                    max={100}
-                    min={20}
-                    step={5}
-                    className="w-full"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Controls base energy consumption and processing speed
-                  </p>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium mb-2 block">
-                    Workload Intensity: {workload[0]}%
-                  </label>
-                  <Slider
-                    value={workload}
-                    onValueChange={setWorkload}
-                    max={100}
-                    min={10}
-                    step={5}
-                    className="w-full"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Simulates computational demand and task complexity
-                  </p>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium mb-2 block">
-                    System Efficiency: {efficiency[0]}%
-                  </label>
-                  <Slider
-                    value={efficiency}
-                    onValueChange={setEfficiency}
-                    max={100}
-                    min={50}
-                    step={5}
-                    className="w-full"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Represents optimization level and resource utilization
-                  </p>
-                </div>
-
-                <div className="flex space-x-2">
-                  <Button variant="outline" size="sm">
-                    <RotateCcw className="h-4 w-4 mr-2" />
-                    Reset to Defaults
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    <Flame className="h-4 w-4 mr-2" />
-                    Stress Test
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    <Snowflake className="h-4 w-4 mr-2" />
-                    Conservation Mode
-                  </Button>
+              
+              <div className="pt-4 border-t">
+                <div className="text-sm text-gray-500 space-y-1">
+                  <div>• Monitoring includes real-time resource usage tracking</div>
+                  <div>• Performance history is maintained for trend analysis</div>
+                  <div>• Health assessments update automatically</div>
+                  <div>• Optimization recommendations are generated based on current metrics</div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Real-time Metrics</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div>
-                  <div className="text-2xl font-bold text-blue-600">{metrics.tokenRate.toFixed(1)}</div>
-                  <div className="text-sm text-gray-600">Tokens/sec</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-green-600">{metrics.cpuUsage.toFixed(0)}%</div>
-                  <div className="text-sm text-gray-600">CPU Usage</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-red-600">{metrics.temperature.toFixed(1)}°C</div>
-                  <div className="text-sm text-gray-600">Temperature</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
