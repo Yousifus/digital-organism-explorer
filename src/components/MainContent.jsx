@@ -9,6 +9,7 @@ import CognitionPanel from './panels/CognitionPanel';
 import ActionPanel from './panels/ActionPanel';
 import MetabolismPanel from './panels/MetabolismPanel';
 import GovernancePanel from './panels/GovernancePanel';
+import EvolutionPanel from './panels/EvolutionPanel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -166,6 +167,12 @@ const MainContent = ({ activePanel, onNodeClick, onNodeHover, onPanelChange }) =
       description: 'Security policies, permissions, and comprehensive audit logging',
       icon: Shield,
       content: <GovernancePanel />
+    },
+    evolution: {
+      title: 'Evolution & Versioning',
+      description: 'Identity ledger, mutation proposals, and controlled evolution workflow',
+      icon: GitBranch,
+      content: <EvolutionPanel />
     }
   };
 
